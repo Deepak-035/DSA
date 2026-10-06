@@ -1,27 +1,57 @@
-/**
- * Note: The returned array must be malloced, assume caller calls free().
- */
- //1. Two Sum
-int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
-    
-    for(int i=0;i<numsSize;i++)
-    {
-        for(int j=i+1;j<numsSize;j++)
-        {
-            if(nums[i]+nums[j]==target)
-            {
-                int* result = malloc(2 * sizeof(int));
+#include <stdlib.h>
 
-                result[0] = i;
-                result[1] = j;
+int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
+
+    int *ans = malloc(2 * sizeof(int));
+
+    // Range of nums[i] is -10^9 to 10^9 in LeetCode,
+    // so use a simple hash table with offset.
+    int size = 200003;
+    int *hash = malloc(size * sizeof(int));
+
+    // Initialize hash table
+    for (int i = 0; i < size; i++) {
+        hash[i] = -1;
+    }
+
+    for (int i = 0; i < numsSize; i++) {
+
+        int complement = target - nums[i];
+
+        // Hash index for complement
+        int index = ((complement % size) + size) % size;
+
+        // Check if complement exists
+        while (hash[index] != -1) {
+
+            if (nums[hash[index]] == complement) {
+
+                ans[0] = hash[index];
+                ans[1] = i;
 
                 *returnSize = 2;
 
-                return result;
+                free(hash);
+                return ans;
             }
+
+            index = (index + 1) % size;
         }
+
+        // Hash index for current number
+        index = ((nums[i] % size) + size) % size;
+
+        // Handle collision
+        while (hash[index] != -1) {
+            index = (index + 1) % size;
+        }
+
+        // Store index
+        hash[index] = i;
     }
+
     *returnSize = 0;
-    return NULL;
-    
+
+    free(hash);
+    return ans;
 }
